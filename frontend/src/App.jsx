@@ -1,17 +1,25 @@
 import { useState } from 'react'
 import Header from './components/Header.jsx'
 import Legend from './components/Legend.jsx'
+import TabBar from './components/TabBar.jsx'
 import PositionsTable from './components/PositionsTable.jsx'
+import AllocationTreemap from './components/AllocationTreemap.jsx'
 import BottomSummary from './components/BottomSummary.jsx'
 import MetadataModal from './components/MetadataModal.jsx'
 import { usePositions } from './hooks/usePositions.js'
 import { useTimezone } from './hooks/useTimezone.js'
+
+const TABS = [
+  { key: 'positions', label: 'Positions' },
+  { key: 'allocation', label: 'Allocation' },
+]
 
 export default function App() {
   const { positions, summary, loading, error, syncing, forceSync, updateMetadata } = usePositions()
   const { code, setCode, formatDate, formatTime } = useTimezone()
   const [selected, setSelected] = useState(null)
   const [editing, setEditing] = useState(null)
+  const [tab, setTab] = useState('positions')
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -25,6 +33,7 @@ export default function App() {
           formatTime={formatTime}
         />
         <Legend />
+        <TabBar tabs={TABS} current={tab} onChange={setTab} />
 
         {error && (
           <div className="mt-4 bg-accent-red/10 border border-accent-red/40 text-accent-red rounded px-4 py-2 text-sm">
@@ -37,13 +46,15 @@ export default function App() {
             <div className="bg-bg-panel border border-line rounded-lg p-8 text-center text-muted">
               Loading positions...
             </div>
-          ) : (
+          ) : tab === 'positions' ? (
             <PositionsTable
               positions={positions}
               selected={selected}
               onSelect={setSelected}
               onEdit={setEditing}
             />
+          ) : (
+            <AllocationTreemap positions={positions} />
           )}
         </div>
 
